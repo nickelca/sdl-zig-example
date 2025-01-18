@@ -12,16 +12,19 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
 
-    const sdl_dep = b.dependency("SDL", .{});
+    const sdl_dep = b.dependency("SDL", .{
+        .target = target,
+        .optimize = optimize,
+    });
     const sdl_lib = sdl_dep.artifact("SDL2");
     exe.linkLibrary(sdl_lib);
-    exe.root_module.addIncludePath(sdl_lib.getEmittedIncludeTree());
 
     const c = b.addTranslateC(.{
         .root_source_file = b.path("src/include.h"),
         .target = target,
         .optimize = optimize,
     });
+    c.addIncludePath(sdl_lib.getEmittedIncludeTree());
     exe.root_module.addImport("c", c.createModule());
 
     b.installArtifact(exe);
